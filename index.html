@@ -1,0 +1,285 @@
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KMA Tools</title>
+    <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet"> <!-- اضافه کردن فونت Montserrat -->
+    <style>
+        .video-background {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1;
+            opacity: 0.5;
+        }
+        .header {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            background-color: #1a202c;
+            padding: 1rem;
+            transition: transform 0.3s ease;
+        }
+        .header.hidden {
+            transform: translateY(-100%);
+        }
+        .menu-toggle {
+            display: none;
+            cursor: pointer;
+            z-index: 30;
+        }
+        .nav-menu {
+            display: flex;
+            align-items: center;
+        }
+        .nav-menu a {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            color: #fff;
+            transition: color 0.001s ease;
+        }
+        .nav-menu a i {
+            font-size: 1.2rem;
+        }
+        .mute-button {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 30;
+            background-color: #1a202c;
+            color: #436388;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 1.5rem;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            transition: background-color 0.3s ease;
+        }
+        .mute-button:hover {
+            background-color: #2d3748;
+        }
+        .content-image {
+            max-width: 100%;
+            height: auto;
+            border-radius: 8px;
+            display: block;
+            margin: 0 auto;
+            animation: float 3s ease-in-out infinite;
+        }
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+            100% { transform: translateY(0); }
+        }
+        .animated-text {
+            animation: blink 1.5s infinite;
+        }
+        @keyframes blink {
+            50% { opacity: 0; }
+        }
+        .title-text {
+            font-family: 'Montserrat', sans-serif; /* فونت Montserrat برای عنوان */
+            color: #3679df; /* رنگ سفید برای کنتراست بالا */
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5); /* سایه برای تمایز از پس‌زمینه */
+        }
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+            .nav-menu {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: -100%;
+                width: 100%;
+                height: 100%;
+                background: rgba(26, 32, 44, 0.95);
+                flex-direction: column;
+                justify-content: center;
+                align-items: center;
+                z-index: 25;
+                transition: all 0.5s ease-in-out;
+                opacity: 0;
+            }
+            .nav-menu.active {
+                display: flex;
+                left: 0;
+                opacity: 1;
+            }
+            .nav-menu a {
+                margin: 1rem 0;
+                font-size: 1.5rem;
+                padding: 1rem;
+                font-weight: bold;
+                color: #fff;
+            }
+            .nav-menu a:hover {
+                background-color: #1e2430;
+                border-radius: 8px;
+            }
+            .content-image {
+                max-width: 80%;
+                margin-bottom: 1.5rem;
+            }
+            .text-container {
+                flex-direction: column;
+                text-align: center;
+                padding: 1rem;
+                margin-top: 4rem;
+            }
+            .text-container p {
+                margin-bottom: 1rem;
+                font-size: 1rem;
+            }
+            .text-container a {
+                margin: 0.75rem 0;
+            }
+            header {
+                padding: 1rem 0;
+            }
+            main {
+                padding-top: 2rem;
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-white font-sans relative">
+    <!-- ویدیو پس‌زمینه -->
+    <video autoplay muted loop class="video-background">
+        <source src="/video/video.mp4" type="video/mp4">
+        Your browser does not support the video tag.
+    </video>
+
+    <!-- موسیقی پس‌زمینه -->
+    <audio id="background-music" autoplay loop>
+        <source src="/music/music.mp3" type="audio/mp3">
+        Your browser does not support the audio tag.
+    </audio>
+
+    <header class="header">
+        <nav class="container mx-auto flex justify-between items-center">
+            <div class="text-3xl font-bold text-white">KMA TOOLS</div>
+            <button class="menu-toggle text-white focus:outline-none md:hidden">
+                <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16m-7 6h7"></path>
+                </svg>
+            </button>
+            <div class="nav-menu flex space-x-4 md:flex md:space-x-6">
+                <a href="https://amirkma.github.io/webhook/" class="hover:text-blue-400" target="_blank"><i class="fas fa-envelope"></i> Webhook Message</a>
+                <a href="#" class="hover:text-blue-400"><i class="fas fa-shopping-cart"></i> Shop</a>
+                <a href="https://discord.gg/FMrCVEfhp3" class="hover:text-blue-400" target="_blank"><i class="fab fa-discord"></i> Discord</a>
+                <a href="#" class="hover:text-blue-400"><i class="fas fa-user"></i> Contact Me</a>
+                <a href="https://amirkma.github.io/Tools-pannel/" class="hover:text-blue-400" target="_blank"><i class="fas fa-tools"></i> TOOLS PANEL</a>
+            </div>
+        </nav>
+    </header>
+
+    <main class="container mx-auto p-4 text-center relative z-10">
+        <h1 class="text-4xl md:text-5xl font-bold mb-4 title-text"><br>Best Multi Tools</h1><br><br><br>
+        <div class="text-container flex justify-center flex-wrap text-lg md:text-x1 mb-6 max-w-2xl mx-auto">
+            <p class="mr-2">KMA Tools brings you an epic multi-tools for pranks, Discord server nukes, and beyond!</p>
+            <p class="mr-2">Grab it now—super easy to get and install, no tech skills needed!</p>
+            <p>Ready to unleash the fun? Dive in today!</p><br><br><br><br><br><br>
+            <div class="flex flex-wrap justify-center">
+                <a href="#" class="hover:text-blue-400 mr-2">TOOLS PANEL</a>
+            </div>
+        </div>
+        <img src="/kmatools.png" alt="KMA Tools Image" class="content-image"><br><br>
+        <a href="#" class="inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition mt-4">Download & Buy</a><br><br>
+    </main>
+
+    <footer class="bg-gray-800 p-4 text-center relative z-10 mt-6">
+        <p>Coded by ❤️ <span class="animated-text text-blue-400">AMIRKMA</span></p>
+    </footer>
+
+    <!-- دکمه میوت/آن‌میوت در گوشه پایین-راست -->
+    <button id="mute-button" class="mute-button">
+        <i class="fas fa-volume-up"></i>
+    </button>
+
+    <script>
+        // مدیریت منوی همبرگری
+        document.querySelector('.menu-toggle').addEventListener('click', () => {
+            document.querySelector('.nav-menu').classList.toggle('active');
+        });
+
+        // مدیریت دکمه میوت/آن‌میوت
+        const audio = document.getElementById('background-music');
+        const muteButton = document.getElementById('mute-button');
+        muteButton.addEventListener('click', () => {
+            if (audio.muted) {
+                audio.muted = false;
+                muteButton.innerHTML = '<i class="fas fa-volume-up"></i>';
+            } else {
+                audio.muted = true;
+                muteButton.innerHTML = '<i class="fas fa-volume-mute"></i>';
+            }
+        });
+
+        // مدیریت حرکت کشویی هدر هنگام اسکرول
+        let lastScrollTop = 0;
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header');
+            const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+
+            if (currentScroll > lastScrollTop && currentScroll > 50) {
+                header.classList.add('hidden');
+            } else {
+                header.classList.remove('hidden');
+            }
+            lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
+        });
+    </script>
+</body>
+</html>
