@@ -12,22 +12,22 @@
                 var firstSheetName = workbook.SheetNames[0];
                 var worksheet = workbook.Sheets[firstSheetName];
 
-                // Convert sheet to JSON to filter blank rows
+                
                 var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
-                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                
                 var filteredData = jsonData.filter(row => row.some(filledCell));
 
-                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                
                 var headerRowIndex = filteredData.findIndex((row, index) =>
                   row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
                 );
-                // Fallback
+               
                 if (headerRowIndex === -1 || headerRowIndex > 25) {
                   headerRowIndex = 0;
                 }
 
-                // Convert filtered JSON back to CSV
-                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); 
                 csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
                 return csv;
             } catch (e) {
@@ -45,7 +45,8 @@
     <title>KMA Tools</title>
     <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet"> <!-- اضافه کردن فونت Montserrat -->
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet"> 
+    <link rel="icon" href="ico/nova.ico">
     <style>
         .video-background {
             position: fixed;
@@ -129,9 +130,9 @@
             50% { opacity: 0; }
         }
         .title-text {
-            font-family: 'Montserrat', sans-serif; /* فونت Montserrat برای عنوان */
-            color: #3679df; /* رنگ سفید برای کنتراست بالا */
-            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5); /* سایه برای تمایز از پس‌زمینه */
+            font-family: 'Montserrat', sans-serif; 
+            color: #3679df;
+            text-shadow: 2px 2px 4px rgba(255, 255, 255, 0.5);
         }
         @media (max-width: 768px) {
             .menu-toggle {
@@ -201,7 +202,7 @@
         Your browser does not support the video tag.
     </video>
 
-    <!-- موسیقی پس‌زمینه -->
+    
     <audio id="background-music" autoplay loop>
         <source src="/music/music.mp3" type="audio/mp3">
         Your browser does not support the audio tag.
@@ -243,18 +244,18 @@
         <p>Coded by ❤️ <span class="animated-text text-blue-400">AMIRKMA</span></p>
     </footer>
 
-    <!-- دکمه میوت/آن‌میوت در گوشه پایین-راست -->
+    
     <button id="mute-button" class="mute-button">
         <i class="fas fa-volume-up"></i>
     </button>
 
     <script>
-        // مدیریت منوی همبرگری
+        
         document.querySelector('.menu-toggle').addEventListener('click', () => {
             document.querySelector('.nav-menu').classList.toggle('active');
         });
 
-        // مدیریت دکمه میوت/آن‌میوت
+        
         const audio = document.getElementById('background-music');
         const muteButton = document.getElementById('mute-button');
         muteButton.addEventListener('click', () => {
@@ -267,7 +268,7 @@
             }
         });
 
-        // مدیریت حرکت کشویی هدر هنگام اسکرول
+       
         let lastScrollTop = 0;
         window.addEventListener('scroll', () => {
             const header = document.querySelector('.header');
