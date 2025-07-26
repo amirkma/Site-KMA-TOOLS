@@ -1,0 +1,560 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KMA Tools</title>
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@700&display=swap" rel="stylesheet">
+    <link rel="icon" href="https://uploadkon.ir/uploads/bf1625_25Screenshot-2024-03-04-150309.png">
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Montserrat', sans-serif;
+            color: #fff;
+            overflow-x: hidden;
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+            background: linear-gradient(135deg, #000000, #0a1a2a);
+            position: relative;
+        }
+        #particleCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            opacity: 0.8;
+        }
+        .header {
+            width: 100%;
+            background-color: rgba(0, 0, 0, 0.9);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center; 
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            transition: transform 0.3s ease;
+        }
+        .header.hidden {
+            transform: translateY(-100%);
+        }
+        .logo {
+            font-size: 1.5em;
+            font-weight: bold;
+            text-transform: uppercase;
+            background: #00c4cc;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: shadowBlink 1.5s ease-in-out infinite;
+            display: flex;
+            align-items: center;
+        }
+        .logo img {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            margin-right: 10px;
+            box-shadow: 0 0 10px #00c4cc;
+        }
+        @keyframes shadowBlink {
+            0% { text-shadow: 0 0 10px turquoise; }
+            33% { text-shadow: 0 0 10px blue; }
+            66% { text-shadow: 0 0 10px white; }
+            100% { text-shadow: 0 0 10px turquoise; }
+        }
+        .nav {
+            display: flex;
+            align-items: center;
+        }
+        .nav a {
+            color: #fff;
+            text-decoration: none;
+            margin: 0 15px;
+            font-size: 1em;
+            transition: color 0.3s ease;
+        }
+        .nav a:hover {
+            color: #00c4cc;
+        }
+        .discord-btn {
+            background-color: #00c4cc;
+            color: #fff;
+            padding: 8px 15px;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: background-color 0.3s ease;
+        }
+        .discord-btn:hover {
+            background-color: #0099a3;
+        }
+        .menu-toggle {
+            display: none;
+            font-size: 1.5em;
+            cursor: pointer;
+            color: #00c4cc;
+        }
+        .nav-menu {
+            display: flexbox;
+        }
+        @media (max-width: 768px) {
+            .menu-toggle {
+                display: block;
+            }
+            .nav-menu {
+                display: none;
+                position: absolute;
+                top: 60px;
+                right: 20px;
+                background-color: rgba(0, 0, 0, 0.9);
+                flex-direction: column;
+                padding: 10px;
+                border-radius: 5px;
+            }
+            .nav-menu.active {
+                display: flex;
+            }
+            .nav a {
+                margin: 10px 0;
+                display: block;
+            }
+            .header {
+                flex-direction: column;
+                padding: 10px;
+            }
+            .logo img {
+                width: 30px;
+                height: 30px;
+            }
+        }
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+        .custom-frame {
+            background-color: rgba(0, 0, 0, 0.5);
+            padding: 25px;
+            border: 2px solid #00c4cc;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 700px;
+            margin: 0 auto;
+            margin-bottom: 20px;
+            text-align: center;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            box-shadow: 0 0 20px #00c4cc;
+            animation: pulse 4s ease-in-out infinite;
+        }
+        @keyframes pulse {
+            0% { box-shadow: 0 0 10px #00c4cc; }
+            50% { box-shadow: 0 0 30px #00c4cc; }
+            100% { box-shadow: 0 0 10px #00c4cc; }
+        }
+        .circular-image {
+            width: 120px;
+            height: 120px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-bottom: 15px;
+            animation: float 3s ease-in-out infinite;
+            box-shadow: 0 0 20px #00c4cc ;
+        }
+        @keyframes float {
+            0% { transform: translateY(0); }
+            50% { transform: translateY(-15px); }
+            100% { transform: translateY(0); }
+        }
+        .circular-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .main-text {
+            font-size: 3.5em;
+            font-weight: bold;
+            margin: 0;
+            background: #00c4cc;
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            animation: shadowBlink 1.5s ease-in-out infinite;
+        }
+        .sub-text {
+            font-size: 1.3em;
+            margin-top: 10px;
+            color: #00c4cc;
+            text-shadow:0 0 8px #7700ff;
+        }
+        .action-btn {
+            background: linear-gradient(45deg, #00c4cc, #0077b6);
+            color: #fff;
+            padding: 12px 25px;
+            border: none;
+            border-radius: 25px;
+            text-decoration: none;
+            margin-top: 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+        .action-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 15px #00c4cc;
+        }
+        .gallery {
+            width: 100%;
+            padding: 40px 20px;
+            text-align: center;
+            margin-top: 20px;
+            margin-bottom: 60px;
+            opacity: 0;
+            transform: translateY(50px);
+            transition: opacity 0.5s ease, transform 0.5s ease;
+            position: relative;
+            height: 400px;
+        }
+        .gallery.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+        .gallery-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100%;
+            width: 100%;
+            max-width: 700px;
+            margin: 0 auto;
+        }
+        .gallery-item {
+            width: 100%;
+            max-width: 700px;
+            height: 400px;
+            border: 2px solid #00c4cc;
+            border-radius: 10px;
+            transition: transform 0.3s ease;
+        }
+        .gallery-item:hover {
+            transform: scale(1.05);
+        }
+        .footer {
+            background-color: rgba(0, 0, 0, 0.9);
+            padding: 20px;
+            text-align: center;
+            width: 100%;
+            margin-top: auto;
+        }
+        .footer p {
+            margin: 5px 0;
+            font-size: 0.9em;
+        }
+        .footer a {
+            color: #00c4cc;
+            text-decoration: none;
+            margin: 0 10px;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .amirkma-shadow {
+            text-shadow: 0 0 10px #00c4cc, 0 0 20px #00c4cc; 
+            color: #fff;
+        }
+        .heart-blink {
+            animation: blink 1.5s ease-in-out infinite; 
+        }
+        @keyframes blink {
+            0% { opacity: 1; }
+            50% { opacity: 0; }
+            100% { opacity: 1; }
+        }
+        .audio-controls {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+        .audio-controls button {
+            background-color: #00c4cc;
+            color: #ffffff;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+            font-size: 1.2em;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .audio-controls button:hover {
+            background-color: #0099a3;
+        }
+        @media (max-width: 768px) {
+            .main-text {
+                font-size: 2.2em;
+            }
+            .sub-text {
+                font-size: 1em;
+            }
+            .action-btn {
+                padding: 10px 20px;
+            }
+            .gallery {
+                height: 200px;
+                padding: 20px 10px;
+                margin-bottom: 40px;
+            }
+            .gallery-container {
+                max-width: 600px;
+            }
+            .gallery-item {
+                width: 100%;
+                height: 200px;
+                max-width: 600px;
+            }
+            .audio-controls {
+                right: 10px;
+                bottom: 10px;
+            }
+            .audio-controls button {
+                width: 35px;
+                height: 35px;
+                font-size: 1em;
+            }
+            .custom-frame {
+                width: 90%;
+                padding: 20px;
+                max-width: 600px;
+            }
+            .circular-image {
+                width: 90px;
+                height: 90px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+            if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+                try {
+                    var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                    var firstSheetName = workbook.SheetNames[0];
+                    var worksheet = workbook.Sheets[firstSheetName];
+                    var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                    var filteredData = jsonData.filter(row => row.some(filledCell));
+                    var headerRowIndex = filteredData.findIndex((row, index) =>
+                      row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                    );
+                    if (headerRowIndex === -1 || headerRowIndex > 25) {
+                      headerRowIndex = 0;
+                    }
+                    var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex));
+                    csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                    return csv;
+                } catch (e) {
+                    console.error(e);
+                    return "";
+                }
+            }
+            return gk_fileData[filename] || "";
+        }
+    </script>
+    <canvas id="particleCanvas"></canvas>
+    <header class="header">
+        <div class="logo">
+            <img src="https://uploadkon.ir/uploads/bf1625_25Screenshot-2024-03-04-150309.png" alt="Logo Image">
+            KMA Tools
+        </div>
+        <div class="menu-toggle">☰</div>
+        <nav class="nav">
+            <div class="nav-menu">
+                <a href="#">Shop</a>
+                <a href="https://discord.com/invite/FMrCVEfhp3">Discord</a>
+                <a href="https://amirkma.github.io/webhook/">Webhook Msg</a>
+                <a href="https://amirkma.github.io/Tools-pannel/" class="discord-btn">Panel</a>
+            </div>
+        </nav>
+    </header>
+    <main class="main-content">
+        <div class="custom-frame">
+            <div class="circular-image">
+                <img src="https://uploadkon.ir/uploads/bf1625_25Screenshot-2024-03-04-150309.png" alt="Circular Image">
+            </div>
+            <h1 class="main-text">KMA Tools</h1>
+            <p class="sub-text">Nova Team On Top!</p>
+            <a href="#" class="action-btn">Join Now</a>
+        </div>
+    </main>
+    <section class="gallery">
+        <div class="gallery-container">
+            <div class="gallery-item"><img src="https://uploadkon.ir/uploads/8fd325_25kmatools.png" srcset="https://uploadkon.ir/uploads/8fd325_25kmatools.png 600w, https://uploadkon.ir/uploads/8fd325_25kmatools.png 300w" sizes="(max-width: 600px) 100vw, 600px" alt="Gallery Image" style="width: 100%; height: 100%; object-fit: cover; border-radius: 8px;"></div>
+        </div>
+    </section>
+    <footer class="footer">
+        <p>© 2025 KMA Tools. All rights reserved.</p>
+        <p>Follow us: <a href="#">Instagram</a> | <a href="#">Github</a></p>
+        <p>Coded By <span class="amirkma-shadow">AMIR KMA</span> With Love <span class="heart-blink">❤️</span></p>
+    </footer>
+    <div class="audio-controls">
+        <button id="playBtn">🔇</button>
+        <button id="stopBtn">🔊</button>
+    </div>
+    <audio id="backgroundMusic" loop autoplay>
+        <source src="https://uploadkon.ir/uploads/22e225_25music1.mp3" type="audio/mp3">
+        Your browser does not support the audio element.
+    </audio>
+    <script>
+        const canvas = document.getElementById('particleCanvas');
+        const ctx = canvas.getContext('2d');
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Particle {
+            constructor() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = (Math.random() - 0.5) * 1;
+                this.speedY = (Math.random() - 0.5) * 1;
+                this.color = `hsl(${Math.random() * 180 + 180}, 70%, 50%)`;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.x < 0 || this.x > canvas.width) this.speedX = -this.speedX;
+                if (this.y < 0 || this.y > canvas.height) this.speedY = -this.speedY;
+            }
+            draw() {
+                ctx.fillStyle = this.color;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        const particlesArray = [];
+        const particleCount = 100;
+
+        for (let i = 0; i < particleCount; i++) {
+            particlesArray.push(new Particle());
+        }
+
+        function connectParticles() {
+            for (let a = 0; a < particlesArray.length; a++) {
+                for (let b = a; b < particlesArray.length; b++) {
+                    const dx = particlesArray[a].x - particlesArray[b].x;
+                    const dy = particlesArray[a].y - particlesArray[b].y;
+                    const distance = Math.sqrt(dx * dx + dy * dy);
+                    if (distance < 100) {
+                        ctx.strokeStyle = `rgba(0, 196, 204, ${1 - distance / 100})`;
+                        ctx.lineWidth = 1;
+                        ctx.beginPath();
+                        ctx.moveTo(particlesArray[a].x, particlesArray[a].y);
+                        ctx.lineTo(particlesArray[b].x, particlesArray[b].y);
+                        ctx.stroke();
+                    }
+                }
+            }
+        }
+
+        function animate() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            for (let i = 0; i < particlesArray.length; i++) {
+                particlesArray[i].update();
+                particlesArray[i].draw();
+            }
+            connectParticles();
+            requestAnimationFrame(animate);
+        }
+
+        animate();
+
+        let lastScrollTop = 0;
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('.header');
+            const currentScroll = window.pageYOffset || document.documentElement.scrollTop;
+
+            if (currentScroll > lastScrollTop && currentScroll > 50) {
+                header.classList.add('hidden');
+            } else {
+                header.classList.remove('hidden');
+            }
+            lastScrollTop = currentScroll <= 0 ? 0 : currentScroll;
+
+            const gallery = document.querySelector('.gallery');
+            const galleryPosition = gallery.getBoundingClientRect().top;
+            const screenPosition = window.innerHeight / 1.3;
+
+            if (galleryPosition < screenPosition) {
+                gallery.classList.add('visible');
+            }
+        });
+
+        window.addEventListener('load', () => {
+            const gallery = document.querySelector('.gallery');
+            gallery.classList.add('visible');
+        });
+
+        const audio = document.getElementById('backgroundMusic');
+        const playBtn = document.getElementById('playBtn');
+        const stopBtn = document.getElementById('stopBtn');
+
+        audio.volume = 0.5;
+        audio.play().catch(error => {
+            console.log("Autoplay blocked by browser:", error);
+        });
+
+        playBtn.addEventListener('click', () => {
+            audio.play();
+            playBtn.style.display = 'none';
+            stopBtn.style.display = 'block';
+        });
+
+        stopBtn.addEventListener('click', () => {
+            audio.pause();
+            audio.currentTime = 0;
+            stopBtn.style.display = 'none';
+            playBtn.style.display = 'block';
+        });
+
+        const menuToggle = document.querySelector('.menu-toggle');
+        const navMenu = document.querySelector('.nav-menu');
+
+        menuToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+    </script>
+</body>
+</html>
